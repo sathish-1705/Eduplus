@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduPlus - Student Dashboard</title>
+  <meta name="description" content="EduPlus Student Dashboard - track your performance, take tests, and prepare for placements."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/student.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+  <div class="bg-animated">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+  </div>
+
+  <!-- Mobile sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+        <span class="logo-text">EduPlus</span>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-avatar">BW</div>
+        <div class="user-info">
+          <div class="user-name">Bruce Wayne</div>
+          <div class="user-role">Student · CSE '25</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Overview</div>
+        <button class="nav-item active" onclick="showSection('dashboard', this)">
+          <i class="fas fa-th-large"></i> Dashboard
+        </button>
+        <button class="nav-item" onclick="showSection('profile', this)">
+          <i class="fas fa-user-circle"></i> My Profile
+        </button>
+
+        <div class="nav-section-label">Academics</div>
+        <button class="nav-item" onclick="showSection('tests', this)">
+          <i class="fas fa-clipboard-list"></i> Tests & Quizzes
+          <span class="nav-badge">2</span>
+        </button>
+        <button class="nav-item" onclick="showSection('assignments', this)">
+          <i class="fas fa-tasks"></i> Assignments
+          <span class="nav-badge">1</span>
+        </button>
+        <button class="nav-item" onclick="showSection('results', this)">
+          <i class="fas fa-chart-bar"></i> Reports
+        </button>
+
+        <div class="nav-section-label">Placement</div>
+        <button class="nav-item" onclick="showSection('placement', this)">
+          <i class="fas fa-briefcase"></i> Placement Prep
+        </button>
+        <button class="nav-item" onclick="showSection('resume', this)">
+          <i class="fas fa-file-alt"></i> Resume Builder
+        </button>
+        <button class="nav-item" onclick="showSection('drives', this)">
+          <i class="fas fa-building"></i> Company Drives
+        </button>
+        <button class="nav-item" onclick="showSection('alumni', this)">
+          <i class="fas fa-user-graduate"></i> Alumni Connect
+        </button>
+
+        <div class="nav-section-label">AI Tools</div>
+        <button class="nav-item" onclick="showSection('analytics', this)">
+          <i class="fas fa-robot"></i> AI Insights
+        </button>
+        <button class="nav-item" onclick="showSection('resources', this)">
+          <i class="fas fa-book-open"></i> Study Resources
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-item" onclick="showSection('settings', this)">
+          <i class="fas fa-cog"></i> Settings
+        </button>
+        <button class="nav-item" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()" style="display:none;">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div>
+            <span class="page-title" id="current-page-title">Dashboard</span>
+            <span class="page-subtitle" id="current-page-sub">Welcome back, Bruce! Here's your today's overview.</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="icon-btn" onclick="showSection('tests', document.querySelector('[onclick*=tests]'))">
+            <i class="fas fa-bell"></i>
+            <span class="notif-dot"></span>
+          </button>
+          <button class="icon-btn">
+            <i class="fas fa-search"></i>
+          </button>
+          <button class="icon-btn" onclick="logout()" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </header>
+
+      <main class="page-content">
+
+        <!-- ==================== DASHBOARD ==================== -->
+        <section class="section active" id="sec-dashboard">
+
+          <!-- Academic Snapshot -->
+          <div class="card academic-overview-card">
+            <div class="card-header academic-overview-header">
+              <div>
+                <div class="card-title">Academic Overview</div>
+                <div class="card-subtitle">Your latest academic summary before exploring other features.</div>
+              </div>
+            </div>
+            <div class="academic-overview-grid" id="academic-overview-grid"></div>
+          </div>
+
+          <!-- Placement Readiness Banner -->
+          <div class="readiness-banner">
+            <div class="readiness-left">
+              <div class="readiness-label">Placement Readiness Index</div>
+              <div class="readiness-score">72<span class="readiness-unit">/100</span></div>
+              <div class="readiness-desc">You're <strong>above average</strong>! Improve your coding score to reach 80+.</div>
+              <div class="readiness-progress">
+                <div class="progress-bar-wrap" style="height:8px; border-radius:4px;">
+                  <div class="progress-bar-fill fill-primary" style="width:72%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="readiness-right">
+              <canvas id="priChart" width="140" height="140"></canvas>
+            </div>
+          </div>
+
+          <!-- Stat Widgets -->
+          <div class="stats-grid">
+            <div class="stat-widget sw-purple">
+              <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">Overall Score</div>
+                <div class="stat-widget-value">78.4%</div>
+                <div class="stat-widget-change change-up"><i class="fas fa-arrow-up"></i> +3.2% this month</div>
+              </div>
+            </div>
+            <div class="stat-widget sw-green">
+              <div class="stat-icon"><i class="fas fa-clipboard-check"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">Tests Taken</div>
+                <div class="stat-widget-value">24</div>
+                <div class="stat-widget-change change-up"><i class="fas fa-arrow-up"></i> 3 this week</div>
+              </div>
+            </div>
+            <div class="stat-widget sw-orange">
+              <div class="stat-icon"><i class="fas fa-fire"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">Current Streak</div>
+                <div class="stat-widget-value">7 days</div>
+                <div class="stat-widget-change change-up"><i class="fas fa-bolt"></i> Keep it up!</div>
+              </div>
+            </div>
+            <div class="stat-widget sw-blue">
+              <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">College Rank</div>
+                <div class="stat-widget-value">#12</div>
+                <div class="stat-widget-change change-up"><i class="fas fa-arrow-up"></i> Up from #18</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts + Tasks Row -->
+          <div class="grid-2-1" style="margin-bottom:20px;">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Performance Trend</div>
+                  <div class="card-subtitle">Last 6 months across test categories</div>
+                </div>
+                <select class="chart-select" id="trend-filter" onchange="updateTrend()">
+                  <option value="all">All Categories</option>
+                  <option value="aptitude">Aptitude</option>
+                  <option value="coding">Coding</option>
+                  <option value="verbal">Verbal</option>
+                </select>
+              </div>
+              <canvas id="trendChart" height="220"></canvas>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Skill Radar</div>
+              </div>
+              <canvas id="radarChart" height="220"></canvas>
+            </div>
+          </div>
+
+          <!-- Upcoming + AI Tip Row -->
+          <div class="grid-2" style="margin-bottom:20px;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-calendar-alt" style="color:var(--primary-light)"></i> Upcoming Tasks</div>
+              </div>
+              <div class="tasks-list" id="upcoming-tasks-list"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-robot" style="color:var(--secondary)"></i> AI Recommendations</div>
+              </div>
+              <div class="ai-recs-list" id="ai-recs-list"></div>
+            </div>
+          </div>
+
+          <!-- Skill Badges -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fas fa-medal" style="color:var(--warning)"></i> Earned Badges</div>
+              <span class="badge badge-primary">8 / 20 Badges</span>
+            </div>
+            <div class="badges-grid" id="badges-grid"></div>
+          </div>
+        </section>
+
+        <!-- ==================== PROFILE ==================== -->
+        <section class="section" id="sec-profile">
+          <div class="grid-1-2">
+            <!-- Profile Card -->
+            <div class="card profile-card-main">
+              <div class="profile-avatar-section">
+                <div class="profile-avatar-lg" id="profile-avatar-lg">BW</div>
+                <div>
+                  <h2 class="profile-name" id="profile-name">Bruce Wayne</h2>
+                  <div class="profile-roll" id="profile-roll">Roll: 21CSE042</div>
+                  <span class="badge badge-success">Active Student</span>
+                </div>
+              </div>
+              <div class="profile-details-list" id="profile-details-list">
+                <div class="profile-detail-item"><i class="fas fa-university"></i><span>B.E. Computer Science Engineering</span></div>
+                <div class="profile-detail-item"><i class="fas fa-calendar"></i><span>Batch: 2021–2025</span></div>
+                <div class="profile-detail-item"><i class="fas fa-star"></i><span>CGPA: 8.4 / 10</span></div>
+                <div class="profile-detail-item"><i class="fas fa-envelope"></i><span>bruce@college.edu</span></div>
+                <div class="profile-detail-item"><i class="fas fa-phone"></i><span>+91 98765 43210</span></div>
+              </div>
+              <div class="portfolio-links">
+                <a href="https://github.com/" class="port-link port-github" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i> GitHub</a>
+                <a href="https://www.linkedin.com/" class="port-link port-linkedin" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                <a href="https://leetcode.com/" class="port-link port-leetcode" target="_blank" rel="noopener noreferrer"><i class="fas fa-code"></i> LeetCode</a>
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;" onclick="toggleEditProfile()">
+                <i class="fas fa-pen"></i> Edit Profile
+              </button>
+            </div>
+
+            <!-- Skills + Academics -->
+            <div style="display:flex;flex-direction:column;gap:20px;">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Skills</div>
+                  <button class="btn btn-secondary btn-sm" onclick="addSkill()"><i class="fas fa-plus"></i> Add</button>
+                </div>
+                <div class="skills-tags" id="skills-tags"></div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Academic Performance</div>
+                </div>
+                <div class="sem-grid" id="sem-grid"></div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Category Score Breakdown</div>
+                </div>
+                <div class="score-breakdown" id="score-breakdown"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TESTS ==================== -->
+        <section class="section" id="sec-tests">
+          <div class="grid-2" style="margin-bottom:20px;">
+            <div class="card tests-filter-card">
+              <div class="filter-chips" id="test-filter-chips">
+                <button class="filter-chip active" onclick="filterTests('ongoing', this)">Ongoing</button>
+                <button class="filter-chip" onclick="filterTests('upcoming', this)">Upcoming</button>
+                <button class="filter-chip" onclick="filterTests('completed', this)">Completed</button>
+              </div>
+            </div>
+            <div class="card" style="padding:16px 22px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div class="stat-icon sw-purple" style="width:38px;height:38px;border-radius:10px;font-size:1rem;"><i class="fas fa-clipboard-list"></i></div>
+                <span style="font-size:0.9rem;color:var(--text-secondary);">2 tests scheduled this week</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tests-grid" id="tests-grid"></div>
+        </section>
+
+        <!-- ==================== ASSIGNMENTS ==================== -->
+        <section class="section" id="sec-assignments">
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-header">
+              <div class="card-title">My Assignments</div>
+              <span class="badge badge-warning">1 Pending</span>
+            </div>
+            <div class="table-wrapper">
+              <table id="assignments-table">
+                <thead>
+                  <tr>
+                    <th>Assignment</th>
+                    <th>Trainer</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="assignments-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== RESULTS ==================== -->
+        <section class="section" id="sec-results">
+          <div class="stats-grid" style="margin-bottom:20px;" id="report-stats"></div>
+
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Academic Reports</div>
+                <div class="card-subtitle">CAT marks and End Semester grades for Anna University IT subjects.</div>
+              </div>
+              <div style="min-width:180px;">
+                <select id="report-sem-filter" onchange="changeReportSemester(this.value)">
+                  <option value="1">Semester 1</option>
+                  <option value="2">Semester 2</option>
+                  <option value="3">Semester 3</option>
+                  <option value="4">Semester 4</option>
+                  <option value="5">Semester 5</option>
+                  <option value="6">Semester 6</option>
+                  <option value="7">Semester 7</option>
+                  <option value="8">Semester 8</option>
+                </select>
+              </div>
+            </div>
+            <div class="filter-chips report-filter-chips" id="report-filter-chips">
+              <button class="filter-chip active" onclick="showReportTab('cat', this)">CAT Marks</button>
+              <button class="filter-chip" onclick="showReportTab('semester', this)">End Semester Marks</button>
+            </div>
+          </div>
+
+          <div class="card report-panel active" id="report-cat">
+            <div class="card-header">
+              <div class="card-title">CAT Marks Report</div>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Subject</th>
+                    <th>CAT 1</th>
+                    <th>CAT 2</th>
+                    <th>CAT 3</th>
+                  </tr>
+                </thead>
+                <tbody id="cat-marks-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card report-panel" id="report-semester">
+            <div class="card-header">
+              <div class="card-title">End Semester Grade Report</div>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Subject</th>
+                    <th>Grade</th>
+                  </tr>
+                </thead>
+                <tbody id="semester-grades-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== PLACEMENT PREP ==================== -->
+        <section class="section" id="sec-placement">
+          <div class="pri-display-card card" style="margin-bottom:24px;">
+            <div class="pri-content">
+              <div>
+                <div class="card-title" style="margin-bottom:6px;">Your Placement Readiness</div>
+                <div class="pri-score-row">
+                  <span class="pri-big-score">72</span>
+                  <span class="pri-tag badge badge-warning">Developing</span>
+                </div>
+                <div class="pri-formula">
+                  Aptitude (25%) + Coding (35%) + Communication (20%) + Technical (20%)
+                </div>
+              </div>
+            </div>
+            <div class="pri-pillars" id="pri-pillars"></div>
+          </div>
+
+          <div class="placement-topics-grid" id="placement-topics"></div>
+        </section>
+
+        <!-- ==================== RESUME BUILDER ==================== -->
+        <section class="section" id="sec-resume">
+          <div class="grid-2">
+            <div style="display:flex;flex-direction:column;gap:20px;">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Resume Builder</div>
+                  <span class="badge badge-info">ATS Ready</span>
+                </div>
+                <div id="resume-form">
+                  <div class="grid-2">
+                    <div class="form-group">
+                      <label>Full Name</label>
+                      <input type="text" id="res-name" value="Bruce Wayne"/>
+                    </div>
+                    <div class="form-group">
+                      <label>Email</label>
+                      <input type="email" id="res-email" value="bruce@college.edu"/>
+                    </div>
+                  </div>
+                  <div class="grid-2">
+                    <div class="form-group">
+                      <label>Phone</label>
+                      <input type="text" id="res-phone" value="+91 98765 43210"/>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Career Objective</label>
+                    <textarea id="res-objective" rows="3" style="resize:vertical">Motivated Computer Science graduate seeking a challenging software engineering role to apply my technical skills and contribute to innovative projects.</textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Skills (comma separated)</label>
+                    <input type="text" id="res-skills" value="Python, Java, React.js, SQL, Machine Learning"/>
+                  </div>
+                  <div class="form-group">
+                    <label>Projects</label>
+                    <textarea id="res-projects" rows="3" style="resize:vertical">1. AI Resume Scorer — NLP-based tool to score resumes against ATS criteria.
+2. Smart Attendance System — Face recognition based attendance using OpenCV.</textarea>
+                  </div>
+                  <button class="btn btn-primary" onclick="generateResume()" style="width:100%;">
+                    <i class="fas fa-magic"></i> Generate Resume
+                  </button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title"><i class="fas fa-robot" style="color:var(--secondary)"></i> ATS Score</div>
+                </div>
+                <div class="ats-score-display">
+                  <div class="ats-gauge">
+                    <canvas id="atsGauge" width="160" height="160"></canvas>
+                    <div class="ats-gauge-label">
+                      <span class="ats-num">78</span>
+                      <span class="ats-unit">/ 100</span>
+                    </div>
+                  </div>
+                  <div class="ats-tips" id="ats-tips"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resume Preview -->
+            <div class="card resume-preview-card">
+              <div class="card-header">
+                <div class="card-title">Resume Preview</div>
+                <button class="btn btn-success btn-sm" onclick="printResume()"><i class="fas fa-print"></i> Print / PDF</button>
+              </div>
+              <div class="resume-preview" id="resume-preview"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== COMPANY DRIVES ==================== -->
+        <section class="section" id="sec-drives">
+          <div class="stats-grid" style="margin-bottom:20px;">
+            <div class="stat-widget sw-green">
+              <div class="stat-icon"><i class="fas fa-building"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">Upcoming Drives</div>
+                <div class="stat-widget-value">6</div>
+              </div>
+            </div>
+            <div class="stat-widget sw-purple">
+              <div class="stat-icon"><i class="fas fa-paper-plane"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">Applied</div>
+                <div class="stat-widget-value">3</div>
+              </div>
+            </div>
+            <div class="stat-widget sw-orange">
+              <div class="stat-icon"><i class="fas fa-star"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">Shortlisted</div>
+                <div class="stat-widget-value">1</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="drives-grid" id="drives-grid"></div>
+        </section>
+
+        <!-- ==================== ALUMNI CONNECT ==================== -->
+        <section class="section" id="sec-alumni">
+          <div class="card alumni-banner-card" style="margin-bottom:24px;">
+            <div class="alumni-banner-content">
+              <div class="alumni-banner-icon"><i class="fas fa-user-graduate"></i></div>
+              <div>
+                <h3>Alumni Connect</h3>
+                <p>Learn directly from passed-out students through practical discussions on placements, interviews, projects, and career growth.</p>
+              </div>
+              <button class="btn btn-primary" onclick="showToast('Mentor request sent to alumni panel!','success')">
+                <i class="fas fa-paper-plane"></i> Request Guidance
+              </button>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:20px;">
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Featured Alumni Mentors</div>
+                  <div class="card-subtitle">Recent graduates helping current students with placement preparation.</div>
+                </div>
+              </div>
+              <div class="alumni-mentor-grid" id="alumni-mentor-grid"></div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Start a Discussion</div>
+                  <div class="card-subtitle">Post a question and receive suggestions from seniors and alumni.</div>
+                </div>
+              </div>
+              <div class="alumni-compose-card">
+                <div class="form-group">
+                  <label>Topic</label>
+                  <input type="text" id="alumni-topic" value="How should I prepare for service-based company interviews in final year?"/>
+                </div>
+                <div class="form-group">
+                  <label>Your Question</label>
+                  <textarea id="alumni-message" rows="5" style="resize:vertical;">I am comfortable with aptitude basics, but I need a clear plan for HR rounds, resume shortlisting, and coding practice for the next 60 days.</textarea>
+                </div>
+                <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="postAlumniQuestion()">
+                  <i class="fas fa-comments"></i> Post to Alumni Discussion
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Discussion Area</div>
+                <div class="card-subtitle">Active guidance threads from alumni for current students.</div>
+              </div>
+            </div>
+            <div class="alumni-discussion-list" id="alumni-discussion-list"></div>
+          </div>
+        </section>
+
+        <!-- ==================== AI INSIGHTS ==================== -->
+        <section class="section" id="sec-analytics">
+          <div class="card ai-banner-card" style="margin-bottom:24px;">
+            <div class="ai-banner-content">
+              <div class="ai-banner-icon"><i class="fas fa-robot"></i></div>
+              <div>
+                <h3>AI Performance Analysis</h3>
+                <p>Powered by machine learning — analyzing your 24 test results to identify patterns and improvement areas.</p>
+              </div>
+              <button class="btn btn-primary" onclick="runAIAnalysis()">
+                <i class="fas fa-sync-alt"></i> Re-Analyze
+              </button>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:20px;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Weak Areas Identified</div>
+                <span class="badge badge-danger">Action Required</span>
+              </div>
+              <div class="weak-areas-list" id="weak-areas-list"></div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Strong Areas</div>
+                <span class="badge badge-success">Keep it up!</span>
+              </div>
+              <div class="strong-areas-list" id="strong-areas-list"></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Topic-wise Performance</div>
+              </div>
+              <canvas id="topicChart" height="260"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Time Spent per Category</div>
+              </div>
+              <canvas id="timeChart" height="260"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== STUDY RESOURCES ==================== -->
+        <section class="section" id="sec-resources">
+          <div class="filter-chips" style="margin-bottom:20px;" id="resource-filter">
+            <button class="filter-chip active" onclick="filterResources('all', this)">All Resources</button>
+            <button class="filter-chip" onclick="filterResources('aptitude', this)">Aptitude</button>
+            <button class="filter-chip" onclick="filterResources('coding', this)">Coding</button>
+            <button class="filter-chip" onclick="filterResources('verbal', this)">Verbal</button>
+            <button class="filter-chip" onclick="filterResources('gd', this)">Group Discussion</button>
+            <button class="filter-chip" onclick="filterResources('interview', this)">Interview</button>
+          </div>
+          <div class="resources-grid" id="resources-grid"></div>
+        </section>
+
+        <!-- ==================== SETTINGS ==================== -->
+        <section class="section" id="sec-settings">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Account Settings</div></div>
+              <div class="form-group"><label>Display Name</label><input type="text" value="Bruce Wayne"/></div>
+              <div class="form-group"><label>Email</label><input type="email" value="bruce@college.edu"/></div>
+              <div class="form-group"><label>New Password</label><input type="password" placeholder="Leave blank to keep current"/></div>
+              <button class="btn btn-primary">Save Changes</button>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Notification Preferences</div></div>
+              <div class="notif-options">
+                <label class="toggle-row"><span>Email notifications for new tests</span><input type="checkbox" checked/></label>
+                <label class="toggle-row"><span>SMS alerts for placement drives</span><input type="checkbox" checked/></label>
+                <label class="toggle-row"><span>Weekly performance report</span><input type="checkbox"/></label>
+                <label class="toggle-row"><span>Assignment deadline reminders</span><input type="checkbox" checked/></label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Test Modal -->
+  <div class="modal-overlay" id="test-modal" style="display:none;" onclick="closeTestModal(event)">
+    <div class="modal-box test-modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modal-test-title">Test</h3>
+        <button class="modal-close" onclick="closeTestModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="modal-test-body"></div>
+    </div>
+  </div>
+
+  <script src="js/student.js" defer></script>
+</body>
+</html>

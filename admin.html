@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduPlus - Admin Dashboard</title>
+  <meta name="description" content="EduPlus Admin Panel - manage students, tests, placements, and analytics."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/admin.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+  <div class="bg-animated">
+    <div class="bg-orb orb-1" style="background:#00d4aa;"></div>
+    <div class="bg-orb orb-2" style="background:#6c63ff;"></div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+        <span class="logo-text">EduPlus</span>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-avatar" style="background:linear-gradient(135deg,#00d4aa,#6c63ff)">SA</div>
+        <div class="user-info">
+          <div class="user-name">Dr. S. Annamalai</div>
+          <div class="user-role">Admin · Placement Head</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Overview</div>
+        <button class="nav-item active" onclick="showSection('dashboard', this)">
+          <i class="fas fa-th-large"></i> Dashboard
+        </button>
+
+        <div class="nav-section-label">Students</div>
+        <button class="nav-item" onclick="showSection('students', this)">
+          <i class="fas fa-users"></i> All Students
+        </button>
+        <button class="nav-item" onclick="showSection('bulk', this)">
+          <i class="fas fa-file-upload"></i> Bulk Import
+        </button>
+
+        <div class="nav-section-label">Tests & Assignments</div>
+        <button class="nav-item" onclick="showSection('tests', this)">
+          <i class="fas fa-clipboard-list"></i> Test Management
+          <span class="nav-badge">3</span>
+        </button>
+        <button class="nav-item" onclick="showSection('assignments', this)">
+          <i class="fas fa-tasks"></i> Assignments
+        </button>
+
+        <div class="nav-section-label">Placement</div>
+        <button class="nav-item" onclick="showSection('drives', this)">
+          <i class="fas fa-building"></i> Placement Drives
+        </button>
+        <button class="nav-item" onclick="showSection('feedback', this)">
+          <i class="fas fa-comment-dots"></i> Interview Feedback
+        </button>
+
+        <div class="nav-section-label">Analytics</div>
+        <button class="nav-item" onclick="showSection('analytics', this)">
+          <i class="fas fa-chart-line"></i> Analytics
+        </button>
+        <button class="nav-item" onclick="showSection('reports', this)">
+          <i class="fas fa-file-alt"></i> Reports
+        </button>
+
+        <div class="nav-section-label">System</div>
+        <button class="nav-item" onclick="showSection('announcements', this)">
+          <i class="fas fa-bullhorn"></i> Announcements
+        </button>
+        <button class="nav-item" onclick="showSection('settings', this)">
+          <i class="fas fa-cog"></i> Settings
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-item" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i> Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()" style="display:none;">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div>
+          <span class="page-title" id="current-page-title">Admin Dashboard</span>
+          <span class="page-subtitle" id="current-page-sub">College overview - March 2026</span>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <span class="admin-chip"><i class="fas fa-shield-alt"></i> Admin Access</span>
+          <button class="icon-btn" onclick="showSection('announcements', document.querySelector('[onclick*=announcements]'))">
+            <i class="fas fa-bell"></i>
+            <span class="notif-dot"></span>
+          </button>
+          <button class="icon-btn" onclick="logout()" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </header>
+
+      <main class="page-content">
+
+        <!-- ============ ADMIN DASHBOARD ============ -->
+        <section class="section active" id="sec-dashboard">
+          <!-- Stats -->
+          <div class="stats-grid">
+            <div class="stat-widget sw-purple">
+              <div class="stat-icon"><i class="fas fa-users"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">Total Students</div>
+                <div class="stat-widget-value">487</div>
+                <div class="stat-widget-change change-up"><i class="fas fa-arrow-up"></i> 23 new this month</div>
+              </div>
+            </div>
+            <div class="stat-widget sw-green">
+              <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">Placed Students</div>
+                <div class="stat-widget-value">214</div>
+                <div class="stat-widget-change change-up"><i class="fas fa-arrow-up"></i> 85% batch rate</div>
+              </div>
+            </div>
+            <div class="stat-widget sw-orange">
+              <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">Tests Conducted</div>
+                <div class="stat-widget-value">142</div>
+                <div class="stat-widget-change change-up"><i class="fas fa-arrow-up"></i> 8 this week</div>
+              </div>
+            </div>
+            <div class="stat-widget sw-blue">
+              <div class="stat-icon"><i class="fas fa-building"></i></div>
+              <div class="stat-widget-info">
+                <div class="stat-widget-label">Companies Visiting</div>
+                <div class="stat-widget-value">18</div>
+                <div class="stat-widget-change change-up"><i class="fas fa-calendar"></i> 6 upcoming</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="grid-2" style="margin-bottom:20px;">
+            <div class="card">
+              <div class="card-header">
+                <div><div class="card-title">Batch Performance Over Time</div><div class="card-subtitle">Average scores across test categories</div></div>
+              </div>
+              <canvas id="batchTrendChart" height="220"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Department-wise Placement Rate</div>
+              </div>
+              <canvas id="deptChart" height="220"></canvas>
+            </div>
+          </div>
+
+          <!-- At-Risk + Top Students -->
+          <div class="grid-2" style="margin-bottom:20px;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-exclamation-triangle" style="color:var(--warning)"></i> At-Risk Students</div>
+                <span class="badge badge-danger">12 flagged</span>
+              </div>
+              <div id="at-risk-list"></div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="fas fa-trophy" style="color:var(--warning)"></i> Top Performers</div>
+                <span class="badge badge-success">Batch 2025</span>
+              </div>
+              <div class="podium" id="podium"></div>
+            </div>
+          </div>
+
+          <!-- Announcements Quick -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="fas fa-bullhorn" style="color:var(--primary-light)"></i> Recent Announcements</div>
+              <button class="btn btn-primary btn-sm" onclick="showSection('announcements', document.querySelector('[onclick*=announcements]'))">
+                <i class="fas fa-plus"></i> New
+              </button>
+            </div>
+            <div id="announcements-preview"></div>
+          </div>
+        </section>
+
+        <!-- ============ STUDENTS ============ -->
+        <section class="section" id="sec-students">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <input type="text" placeholder="Search by name or roll number..." id="student-search"
+                style="width:260px;" oninput="searchStudents(this.value)"/>
+              <select id="dept-filter" onchange="filterStudents()">
+                <option value="">All Departments</option>
+                <option>CSE</option><option>IT</option><option>ECE</option><option>EEE</option><option>MECH</option>
+              </select>
+              <select id="batch-filter" onchange="filterStudents()">
+                <option value="">All Batches</option>
+                <option>2025</option><option>2026</option><option>2027</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <button class="btn btn-secondary btn-sm" onclick="exportStudents()"><i class="fas fa-download"></i> Export</button>
+              <button class="btn btn-primary btn-sm" onclick="openAddStudent()"><i class="fas fa-plus"></i> Add Student</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div><div class="card-title">All Students</div><div class="card-subtitle" id="student-count-label">Showing 10 of 487 students</div></div>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student</th><th>Roll No.</th><th>Dept.</th><th>Batch</th>
+                    <th>Contact</th><th>CGPA</th><th>PRI Score</th><th>Status</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="students-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ BULK IMPORT ============ -->
+        <section class="section" id="sec-bulk">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Bulk Import Students</div></div>
+              <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:20px;">
+                Upload a CSV or Excel file with student data. Download the template first.
+              </p>
+              <button class="btn btn-secondary" style="margin-bottom:16px;" onclick="showToast('Template downloaded!','success')">
+                <i class="fas fa-download"></i> Download Template
+              </button>
+              <div class="drop-zone" id="drop-zone" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+                <i class="fas fa-cloud-upload-alt" style="font-size:3rem;color:var(--text-muted);margin-bottom:16px;display:block;"></i>
+                <div style="font-size:0.95rem;font-weight:600;margin-bottom:8px;">Drag & Drop CSV/Excel file here</div>
+                <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:16px;">or</div>
+                <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+                  <i class="fas fa-folder-open"></i> Browse File
+                </button>
+                <input type="file" id="file-input" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleFileUpload(this)"/>
+              </div>
+              <div id="upload-result" style="margin-top:16px;"></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">CSV Format Guide</div></div>
+              <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:16px;">Your CSV should have the following columns:</p>
+              <div class="table-wrapper">
+                <table>
+                  <thead><tr><th>Column</th><th>Type</th><th>Example</th></tr></thead>
+                  <tbody>
+                    <tr><td>full_name</td><td>Text</td><td>Arun Sharma</td></tr>
+                    <tr><td>roll_number</td><td>Text</td><td>21CSE042</td></tr>
+                    <tr><td>email</td><td>Email</td><td>arun@college.edu</td></tr>
+                    <tr><td>department</td><td>Text</td><td>CSE</td></tr>
+                    <tr><td>batch_year</td><td>Number</td><td>2025</td></tr>
+                    <tr><td>cgpa</td><td>Decimal</td><td>8.4</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ TEST MANAGEMENT ============ -->
+        <section class="section" id="sec-tests">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div><h3 style="font-size:1rem;font-weight:700;">All Tests</h3></div>
+            <button class="btn btn-primary" onclick="openCreateTest()"><i class="fas fa-plus"></i> Create Test</button>
+          </div>
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr><th>Test Name</th><th>Category</th><th>Questions</th><th>Duration</th><th>Scheduled</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="admin-tests-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ ASSIGNMENTS ============ -->
+        <section class="section" id="sec-assignments">
+          <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+            <h3 style="font-size:1rem;font-weight:700;">Assignments</h3>
+            <button class="btn btn-primary" onclick="openCreateAssignment()"><i class="fas fa-plus"></i> Create Assignment</button>
+          </div>
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead><tr><th>Assignment</th><th>Trainer</th><th>Deadline</th><th>Submissions</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="admin-assign-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ PLACEMENT DRIVES ============ -->
+        <section class="section" id="sec-drives">
+          <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+            <h3 style="font-size:1rem;font-weight:700;">Placement Drives</h3>
+            <button class="btn btn-primary" onclick="openAddDrive()"><i class="fas fa-plus"></i> Add Drive</button>
+          </div>
+          <div class="stats-grid" style="margin-bottom:20px;">
+            <div class="stat-widget sw-green"><div class="stat-icon"><i class="fas fa-check-double"></i></div>
+              <div class="stat-widget-info"><div class="stat-widget-label">Placed This Year</div><div class="stat-widget-value">214</div></div></div>
+            <div class="stat-widget sw-blue"><div class="stat-icon"><i class="fas fa-building"></i></div>
+              <div class="stat-widget-info"><div class="stat-widget-label">Drives Conducted</div><div class="stat-widget-value">12</div></div></div>
+            <div class="stat-widget sw-orange"><div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+              <div class="stat-widget-info"><div class="stat-widget-label">Highest CTC</div><div class="stat-widget-value">18 LPA</div></div></div>
+          </div>
+          <div class="card">
+            <div class="table-wrapper">
+              <table>
+                <thead><tr><th>Company</th><th>Role</th><th>CTC</th><th>Min CGPA</th><th>Date</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="admin-drives-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ INTERVIEW FEEDBACK ============ -->
+        <section class="section" id="sec-feedback">
+          <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+            <h3 style="font-size:1rem;font-weight:700;">Interview Feedback Records</h3>
+            <button class="btn btn-primary" onclick="openAddFeedback()"><i class="fas fa-plus"></i> Add Feedback</button>
+          </div>
+          <div id="feedback-list"></div>
+        </section>
+
+        <!-- ============ ANALYTICS ============ -->
+        <section class="section" id="sec-analytics">
+          <div class="stats-grid" style="margin-bottom:20px;">
+            <div class="stat-widget sw-purple">
+              <div class="stat-icon"><i class="fas fa-brain"></i></div>
+              <div class="stat-widget-info"><div class="stat-widget-label">Avg. Aptitude Score</div><div class="stat-widget-value">67.3%</div></div>
+            </div>
+            <div class="stat-widget sw-green">
+              <div class="stat-icon"><i class="fas fa-code"></i></div>
+              <div class="stat-widget-info"><div class="stat-widget-label">Avg. Coding Score</div><div class="stat-widget-value">61.8%</div></div>
+            </div>
+            <div class="stat-widget sw-orange">
+              <div class="stat-icon"><i class="fas fa-comments"></i></div>
+              <div class="stat-widget-info"><div class="stat-widget-label">Avg. Verbal Score</div><div class="stat-widget-value">74.2%</div></div>
+            </div>
+            <div class="stat-widget sw-blue">
+              <div class="stat-icon"><i class="fas fa-chart-pie"></i></div>
+              <div class="stat-widget-info"><div class="stat-widget-label">Avg. PRI</div><div class="stat-widget-value">68.5</div></div>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-bottom:20px;">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Score Distribution</div></div>
+              <canvas id="distChart" height="220"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Category Comparison</div></div>
+              <canvas id="catCompChart" height="220"></canvas>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Placement Drive Applications</div></div>
+              <canvas id="driveAppChart" height="220"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Monthly Test Activity</div></div>
+              <canvas id="activityChart" height="220"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ REPORTS ============ -->
+        <section class="section" id="sec-reports">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Generate Reports</div></div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div class="form-group"><label>Report Type</label>
+                  <select><option>Batch Performance Report</option><option>Individual Student Report</option>
+                  <option>Placement Summary</option><option>Test Results Export</option></select></div>
+                <div class="form-group"><label>Batch Year</label>
+                  <select><option>2025</option><option>2026</option><option>2027</option></select></div>
+                <div class="form-group"><label>Department</label>
+                  <select><option>All</option><option>CSE</option><option>IT</option><option>ECE</option></select></div>
+                <div class="form-group"><label>Format</label>
+                  <select><option>PDF</option><option>Excel</option><option>CSV</option></select></div>
+                <button class="btn btn-primary" onclick="showToast('Report generated! Download starting...','success')">
+                  <i class="fas fa-download"></i> Generate & Download
+                </button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">Quick Reports</div></div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <button class="btn btn-secondary" onclick="showToast('NAAC report exported!','success')"><i class="fas fa-file-pdf"></i> NAAC Accreditation Report</button>
+                <button class="btn btn-secondary" onclick="showToast('Placement stats exported!','success')"><i class="fas fa-chart-bar"></i> Placement Statistics 2025</button>
+                <button class="btn btn-secondary" onclick="showToast('Test summary exported!','success')"><i class="fas fa-clipboard"></i> Test Summary Report</button>
+                <button class="btn btn-secondary" onclick="showToast('At-risk report exported!','success')"><i class="fas fa-exclamation-triangle"></i> At-Risk Students Report</button>
+                <button class="btn btn-secondary" onclick="showToast('Top performers exported!','success')"><i class="fas fa-trophy"></i> Top Performers List</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ ANNOUNCEMENTS ============ -->
+        <section class="section" id="sec-announcements">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Create Announcement</div></div>
+              <div class="form-group"><label>Title</label>
+                <input type="text" id="ann-title" placeholder="Announcement title..."/></div>
+              <div class="form-group"><label>Message</label>
+                <textarea id="ann-msg" rows="4" placeholder="Write your message here..."></textarea></div>
+              <div class="form-group"><label>Target Audience</label>
+                <select id="ann-target">
+                  <option>All Students</option><option>CSE Batch 2025</option><option>All Staff</option>
+                  <option>Final Year Students</option><option>Entire College</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Priority</label>
+                <select id="ann-priority">
+                  <option>Normal</option><option>Important</option><option>Urgent</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="postAnnouncement()"><i class="fas fa-paper-plane"></i> Post Announcement</button>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Recent Announcements</div>
+                <span class="badge badge-primary" id="ann-count">3</span>
+              </div>
+              <div id="announcements-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ SETTINGS ============ -->
+        <section class="section" id="sec-settings">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><div class="card-title">College Settings</div></div>
+              <div class="form-group"><label>College Name</label><input type="text" value="Velammal Engineering College"/></div>
+              <div class="form-group"><label>Current Academic Year</label><input type="text" value="2025–2026"/></div>
+              <div class="form-group"><label>Placement Officer Email</label><input type="email" value="placement@college.edu"/></div>
+              <div class="form-group"><label>CGPA Placement Cutoff (Default)</label><input type="number" value="6.5" step="0.1"/></div>
+              <button class="btn btn-primary">Save Settings</button>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title">System Information</div></div>
+              <div class="profile-details-list">
+                <div class="profile-detail-item"><i class="fas fa-users" style="color:var(--primary-light)"></i><span>487 Active Students</span></div>
+                <div class="profile-detail-item"><i class="fas fa-chalkboard-teacher" style="color:var(--secondary)"></i><span>12 Staff / Officers</span></div>
+                <div class="profile-detail-item"><i class="fas fa-database" style="color:var(--warning)"></i><span>142 Tests in Database</span></div>
+                <div class="profile-detail-item"><i class="fas fa-question-circle" style="color:var(--info)"></i><span>1,284 Questions in Bank</span></div>
+                <div class="profile-detail-item"><i class="fas fa-server" style="color:var(--success)"></i><span>System Status: Online ✓</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-container"></div>
+
+  <!-- Generic Modal -->
+  <div class="modal-overlay" id="generic-modal" style="display:none;" onclick="closeModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal</h3>
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="js/admin.js" defer></script>
+</body>
+</html>

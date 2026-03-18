@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduPlus - Take Test</title>
+  <meta name="description" content="EduPlus Mock Test - aptitude, coding, and verbal ability tests for placement preparation."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    /* ---- Test Page Layout ---- */
+    .test-page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .test-topbar {
+      height: 64px;
+      background: rgba(15,14,23,0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .test-topbar-left { display: flex; align-items: center; gap: 18px; }
+    .test-title { font-size: 1rem; font-weight: 700; }
+    .test-category-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .timer-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 8px 16px;
+    }
+    .timer-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .timer-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--warning);
+      font-family: 'Inter', monospace;
+      min-width: 70px;
+    }
+    .timer-box.urgent .timer-value { color: var(--danger); animation: pulse-glow 1s ease infinite; }
+
+    /* ---- Main Area ---- */
+    .test-main {
+      flex: 1;
+      display: flex;
+      gap: 0;
+      max-width: 1300px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 28px;
+      gap: 24px;
+    }
+
+    /* ---- Question Panel ---- */
+    .question-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .question-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .question-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .question-number {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+    }
+    .question-marks {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .question-text {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.65;
+      margin-bottom: 28px;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+    .option-card:hover {
+      border-color: rgba(108,99,255,0.5);
+      background: rgba(108,99,255,0.05);
+    }
+    .option-card.selected {
+      border-color: var(--primary);
+      background: rgba(108,99,255,0.12);
+    }
+    .option-card.correct {
+      border-color: var(--success);
+      background: rgba(0,212,170,0.12);
+    }
+    .option-card.wrong {
+      border-color: var(--danger);
+      background: rgba(255,107,107,0.1);
+    }
+
+    .option-letter {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: var(--transition);
+      color: var(--text-secondary);
+    }
+    .option-card.selected .option-letter {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .option-card.correct .option-letter {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+    .option-card.wrong .option-letter {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: #fff;
+    }
+
+    .option-text {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    /* Nav Buttons */
+    .question-nav-btns {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .mark-review-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--warning);
+      background: rgba(255,159,67,0.08);
+      color: var(--warning);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .mark-review-btn.marked {
+      background: rgba(255,159,67,0.2);
+    }
+    .mark-review-btn:hover { background: rgba(255,159,67,0.15); }
+
+    /* ---- Sidebar Panel ---- */
+    .test-sidebar {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+
+    .sidebar-card-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Question Grid */
+    .qn-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .qn-btn {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      border: 1.5px solid var(--border-light);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qn-btn:hover { border-color: var(--primary); color: var(--primary-light); }
+    .qn-btn.answered { background: rgba(0,212,170,0.15); border-color: var(--success); color: var(--success); }
+    .qn-btn.current  { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .qn-btn.marked   { background: rgba(255,159,67,0.15); border-color: var(--warning); color: var(--warning); }
+    .qn-btn.skipped  { background: rgba(255,107,107,0.1); border-color: var(--danger); color: var(--danger); }
+
+    /* Legend */
+    .legend { display: flex; flex-direction: column; gap: 8px; }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .legend-dot {
+      width: 14px; height: 14px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    /* Progress bar in sidebar */
+    .test-progress { margin-bottom: 14px; }
+    .test-progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    /* Submit confirmation */
+    .submit-card {
+      background: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(0,212,170,0.08));
+      border: 1px solid rgba(108,99,255,0.25);
+    }
+    .submit-card .btn-submit {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(108,99,255,0.3);
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(108,99,255,0.45); }
+
+    /* ---- Result Screen ---- */
+    .result-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-dark);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.4s ease;
+    }
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      padding: 48px 40px;
+      width: 90%;
+      max-width: 680px;
+      text-align: center;
+    }
+    .result-emoji { font-size: 4rem; margin-bottom: 16px; }
+    .result-title { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+    .result-subtitle { font-size: 1rem; color: var(--text-secondary); margin-bottom: 32px; }
+    .result-stats {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .result-stat {
+      background: rgba(255,255,255,0.04);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      border: 1px solid var(--border-light);
+    }
+    .result-stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .result-stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .result-breakdown {
+      text-align: left;
+      margin-bottom: 28px;
+    }
+    .result-breakdown-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .rb-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .rb-label { width: 140px; font-size: 0.83rem; color: var(--text-secondary); }
+    .rb-bar { flex: 1; }
+    .rb-score { width: 40px; text-align: right; font-size: 0.83rem; font-weight: 700; }
+    .result-actions { display: flex; gap: 12px; justify-content: center; }
+  </style>
+</head>
+<body>
+  <div class="bg-animated">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+  </div>
+
+  <div class="test-page">
+    <!-- Top Bar -->
+    <header class="test-topbar">
+      <div class="test-topbar-left">
+        <div class="brand-logo" style="gap:10px;">
+          <div class="logo-icon" style="width:36px;height:36px;font-size:1rem;border-radius:10px;animation:none;">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <span class="logo-text" style="font-size:1.2rem;">EduPlus</span>
+        </div>
+        <div style="width:1px;height:28px;background:var(--border-light);"></div>
+        <div>
+          <div class="test-title" id="test-header-title">Aptitude Mock Test – Series 8</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Bruce Wayne · 21CSE042</div>
+        </div>
+        <span class="test-category-badge badge-primary" id="test-cat-badge">Aptitude</span>
+      </div>
+      <div class="timer-box" id="timer-box">
+        <div>
+          <div class="timer-label">Time Left</div>
+          <div class="timer-value" id="timer-display">30:00</div>
+        </div>
+        <i class="fas fa-clock" style="color:var(--warning);font-size:1.3rem;"></i>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="test-main">
+      <!-- Question Panel -->
+      <div class="question-panel">
+        <div class="question-card" id="question-card">
+          <!-- Populated by JS -->
+        </div>
+        <div class="question-nav-btns">
+          <button class="mark-review-btn" id="mark-btn" onclick="toggleMarkReview()">
+            <i class="fas fa-bookmark"></i> Mark for Review
+          </button>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-secondary" id="prev-btn" onclick="prevQ()" style="display:none;">
+              <i class="fas fa-arrow-left"></i> Previous
+            </button>
+            <button class="btn btn-secondary" onclick="clearAnswer()">
+              <i class="fas fa-eraser"></i> Clear
+            </button>
+            <button class="btn btn-primary" id="next-btn" onclick="nextQ()">
+              Next <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="test-sidebar">
+        <!-- Progress -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">Progress</div>
+          <div class="test-progress">
+            <div class="test-progress-label">
+              <span id="answered-count">0 Answered</span>
+              <span id="total-count">of 20</span>
+            </div>
+            <div class="progress-bar-wrap" style="height:8px;">
+              <div class="progress-bar-fill fill-success" id="progress-fill" style="width:0%;transition:width 0.5s ease;"></div>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background:rgba(0,212,170,0.5);border:1.5px solid var(--success);"></div>
+              <span>Answered</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:var(--primary);"></div>
+              <span>Current Question</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:rgba(255,159,67,0.3);border:1.5px solid var(--warning);"></div>
+              <span>Marked for Review</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:rgba(255,255,255,0.04);border:1.5px solid var(--border-light);"></div>
+              <span>Not Visited</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Question Grid -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">Question Palette</div>
+          <div class="qn-grid" id="qn-grid"></div>
+        </div>
+
+        <!-- Submit Card -->
+        <div class="sidebar-card submit-card">
+          <div class="sidebar-card-title">Submit Test</div>
+          <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:16px;">
+            Make sure you've reviewed all questions before submitting.
+          </div>
+          <button class="btn-submit" onclick="confirmSubmit()">
+            <i class="fas fa-paper-plane"></i> Submit Test
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result Overlay -->
+  <div class="result-overlay" id="result-overlay" style="display:none;">
+    <div class="result-card">
+      <div class="result-emoji" id="result-emoji">🎉</div>
+      <div class="result-title" id="result-title">Test Submitted!</div>
+      <div class="result-subtitle" id="result-subtitle">Here's how you performed:</div>
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="result-stat-value" id="res-score" style="color:var(--success)">0/20</div>
+          <div class="result-stat-label">Score</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-value" id="res-pct" style="color:var(--primary-light)">0%</div>
+          <div class="result-stat-label">Accuracy</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-value" id="res-time" style="color:var(--warning)">0:00</div>
+          <div class="result-stat-label">Time Used</div>
+        </div>
+      </div>
+      <div class="result-breakdown">
+        <div class="result-breakdown-title">Topic-wise Performance</div>
+        <div id="topic-breakdown"></div>
+      </div>
+      <div class="result-actions">
+        <a href="student.html" class="btn btn-secondary btn-lg"><i class="fas fa-home"></i> Dashboard</a>
+        <button class="btn btn-primary btn-lg" onclick="reviewAnswers()">
+          <i class="fas fa-eye"></i> Review Answers
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-container"></div>
+
+  <script>
+    // ========== TEST DATA ==========
+    const testConfig = {
+      title: 'Aptitude Mock Test – Series 8',
+      category: 'Aptitude',
+      duration: 30, // minutes
+      totalMarks: 40,
+    };
+
+    const questions = [
+      { id:1, text:'A train travels 240 km in 4 hours. What is its speed in km/h?', topic:'Basic Maths',
+        opts:['50 km/h','60 km/h','70 km/h','80 km/h'], correct:1 },
+      { id:2, text:'What is the next number in the series: 2, 6, 18, 54, ...?', topic:'Number Series',
+        opts:['108','162','216','324'], correct:1 },
+      { id:3, text:'If A is B\'s sister, C is B\'s mother, D is C\'s father, then how is A related to D?', topic:'Blood Relations',
+        opts:['Daughter','Granddaughter','Grandmother','Niece'], correct:1 },
+      { id:4, text:'A shopkeeper bought goods for ₹800 and sold them for ₹1000. What is the profit %?', topic:'Profit & Loss',
+        opts:['20%','25%','30%','15%'], correct:1 },
+      { id:5, text:'If P + Q means P is the father of Q, P – Q means P is the sister of Q, P × Q means P is the brother of Q, then in A + B – C, how is A related to C?', topic:'Blood Relations',
+        opts:['Father','Uncle','Brother','Grandfather'], correct:0 },
+      { id:6, text:'What is 15% of 240?', topic:'Percentage',
+        opts:['36','30','40','32'], correct:0 },
+      { id:7, text:'Find the odd one out: 8, 27, 64, 100, 125', topic:'Number Series',
+        opts:['8','27','100','125'], correct:2 },
+      { id:8, text:'In a class of 60 students, 40% are boys. How many girls are there?', topic:'Percentage',
+        opts:['24','36','30','40'], correct:1 },
+      { id:9, text:'Two pipes can fill a tank in 12 and 15 hours respectively. How long will they take together?', topic:'Time & Work',
+        opts:['6h 40min','5h','7h 12min','6h'], correct:0 },
+      { id:10, text:'A is faster than B. B is faster than C. If A takes 10 sec less than C, and B takes 5 sec less than C, how many seconds does A take more than B?', topic:'Time & Work',
+        opts:['5','10','15','20'], correct:0 },
+      { id:11, text:'Which word is the antonym of "Ephemeral"?', topic:'Verbal',
+        opts:['Temporary','Permanent','Fleeting','Brief'], correct:1 },
+      { id:12, text:'Pointing to a girl, Ram said "She is the only daughter of my grandfather\'s only child." How is the girl related to Ram?', topic:'Blood Relations',
+        opts:['Sister','Cousin','Niece','Aunt'], correct:0 },
+      { id:13, text:'Average of five numbers is 27. If one number is excluded, the average becomes 25. What is the excluded number?', topic:'Averages',
+        opts:['30','35','37','40'], correct:1 },
+      { id:14, text:'A car covers a distance in 5 hours at 60 km/h. How long will it take at 75 km/h?', topic:'Speed & Distance',
+        opts:['3h','4h','4.5h','3.5h'], correct:1 },
+      { id:15, text:'If ROSE is coded as 6821, how is MORE coded?', topic:'Coding-Decoding',
+        opts:['3261','3621','2361','3216'], correct:0 },
+      { id:16, text:'Select the correct option: He is one of the students who (has/have) topped the exam.', topic:'Grammar',
+        opts:['has','none of these','have','both are correct'], correct:2 },
+      { id:17, text:'If 3x + 7 = 25 – x, what is the value of x?', topic:'Algebra',
+        opts:['3','4','4.5','2'], correct:1 },
+      { id:18, text:'A rectangular plot is 30m × 20m. What is the cost of fencing at ₹50/m?', topic:'Mensuration',
+        opts:['₹4000','₹5000','₹3500','₹4500'], correct:1 },
+      { id:19, text:'In how many ways can the letters of the word "EXAM" be arranged?', topic:'Permutations',
+        opts:['12','24','36','48'], correct:1 },
+      { id:20, text:'What is the probability of getting a prime number when a die is thrown?', topic:'Probability',
+        opts:['1/3','1/2','2/3','1/6'], correct:1 },
+    ];
+
+    // ========== STATE ==========
+    let currentQ    = 0;
+    let answers     = {};  // { qIndex: optionIndex }
+    let marked      = {};  // { qIndex: true }
+    let visited     = {};  // { qIndex: true }
+    let timerSeconds = testConfig.duration * 60;
+    let timerInterval = null;
+    let testStartTime = Date.now();
+    let isReviewMode = false;
+
+    // ========== INIT ==========
+    function init() {
+      visited[0] = true;
+      renderQuestion();
+      renderGrid();
+      startTimer();
+      document.getElementById('total-count').textContent = `of ${questions.length}`;
+    }
+
+    // ========== TIMER ==========
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        updateTimerDisplay();
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          submitTest();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(timerSeconds / 60).toString().padStart(2,'0');
+      const s = (timerSeconds % 60).toString().padStart(2,'0');
+      document.getElementById('timer-display').textContent = `${m}:${s}`;
+      const box = document.getElementById('timer-box');
+      if (timerSeconds <= 120) box.classList.add('urgent');
+      else box.classList.remove('urgent');
+    }
+
+    // ========== RENDER QUESTION ==========
+    function renderQuestion() {
+      const q = questions[currentQ];
+      const card = document.getElementById('question-card');
+
+      card.innerHTML = `
+        <div class="question-meta">
+          <div class="question-number">Question ${currentQ + 1} of ${questions.length} · ${q.topic}</div>
+          <div class="question-marks"><i class="fas fa-star"></i> 2 Marks</div>
+        </div>
+        <div class="question-text">${q.text}</div>
+        <div class="options-grid">
+          ${q.opts.map((opt, i) => {
+            let cls = '';
+            if (isReviewMode) {
+              if (i === q.correct) cls = 'correct';
+              else if (answers[currentQ] === i && i !== q.correct) cls = 'wrong';
+            } else {
+              if (answers[currentQ] === i) cls = 'selected';
+            }
+            return `
+              <div class="option-card ${cls}" onclick="${isReviewMode ? '' : `selectOpt(${i})`}">
+                <div class="option-letter">${String.fromCharCode(65+i)}</div>
+                <div class="option-text">${opt}</div>
+                ${isReviewMode && i === q.correct ? '<i class="fas fa-check-circle" style="color:var(--success);margin-left:auto;"></i>' : ''}
+                ${isReviewMode && answers[currentQ] === i && i !== q.correct ? '<i class="fas fa-times-circle" style="color:var(--danger);margin-left:auto;"></i>' : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      // Update nav buttons
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const markBtn = document.getElementById('mark-btn');
+
+      prevBtn.style.display = currentQ > 0 ? 'flex' : 'none';
+      nextBtn.innerHTML = currentQ < questions.length - 1
+        ? 'Next <i class="fas fa-arrow-right"></i>'
+        : 'Last Question <i class="fas fa-flag"></i>';
+
+      if (marked[currentQ]) {
+        markBtn.classList.add('marked');
+        markBtn.innerHTML = '<i class="fas fa-bookmark"></i> Marked';
+      } else {
+        markBtn.classList.remove('marked');
+        markBtn.innerHTML = '<i class="fas fa-bookmark"></i> Mark for Review';
+      }
+
+      updateProgress();
+    }
+
+    // ========== OPTION SELECT ==========
+    function selectOpt(i) {
+      answers[currentQ] = i;
+      renderQuestion();
+      renderGrid();
+    }
+
+    function clearAnswer() {
+      delete answers[currentQ];
+      renderQuestion();
+      renderGrid();
+      showToast('Answer cleared.', 'info');
+    }
+
+    // ========== NAVIGATION ==========
+    function nextQ() {
+      if (currentQ < questions.length - 1) {
+        currentQ++;
+        visited[currentQ] = true;
+        renderQuestion();
+        renderGrid();
+      }
+    }
+
+    function prevQ() {
+      if (currentQ > 0) {
+        currentQ--;
+        renderQuestion();
+        renderGrid();
+      }
+    }
+
+    function goToQ(i) {
+      currentQ = i;
+      visited[i] = true;
+      renderQuestion();
+      renderGrid();
+    }
+
+    function toggleMarkReview() {
+      if (marked[currentQ]) delete marked[currentQ];
+      else marked[currentQ] = true;
+      renderQuestion();
+      renderGrid();
+      showToast(marked[currentQ] ? 'Marked for review' : 'Review mark removed', 'info');
+    }
+
+    // ========== GRID ==========
+    function renderGrid() {
+      const grid = document.getElementById('qn-grid');
+      grid.innerHTML = questions.map((_, i) => {
+        let cls = '';
+        if (i === currentQ) cls = 'current';
+        else if (marked[i]) cls = 'marked';
+        else if (answers[i] !== undefined) cls = 'answered';
+        return `<button class="qn-btn ${cls}" onclick="goToQ(${i})">${i+1}</button>`;
+      }).join('');
+    }
+
+    // ========== PROGRESS ==========
+    function updateProgress() {
+      const answered = Object.keys(answers).length;
+      const total = questions.length;
+      const pct = Math.round((answered / total) * 100);
+      document.getElementById('answered-count').textContent = `${answered} Answered`;
+      document.getElementById('progress-fill').style.width = `${pct}%`;
+    }
+
+    // ========== SUBMIT ==========
+    function confirmSubmit() {
+      const answered = Object.keys(answers).length;
+      const unanswered = questions.length - answered;
+      if (unanswered > 0) {
+        if (!confirm(`You have ${unanswered} unanswered question(s). Are you sure you want to submit?`)) return;
+      } else {
+        if (!confirm('Are you sure you want to submit the test?')) return;
+      }
+      submitTest();
+    }
+
+    function submitTest() {
+      clearInterval(timerInterval);
+      const timeTaken = testConfig.duration * 60 - timerSeconds;
+      const correct = questions.filter((q, i) => answers[i] === q.correct).length;
+      const total   = questions.length;
+      const pct     = Math.round((correct / total) * 100);
+
+      const mins = Math.floor(timeTaken / 60);
+      const secs = timeTaken % 60;
+
+      // Result screen
+      document.getElementById('result-emoji').textContent = pct >= 70 ? '🎉' : pct >= 50 ? '📈' : '💪';
+      document.getElementById('result-title').textContent = pct >= 70 ? 'Great Job!' : pct >= 50 ? 'Good Attempt!' : 'Keep Practicing!';
+      document.getElementById('result-subtitle').textContent = pct >= 70
+        ? 'You performed excellently on this test.'
+        : 'Review your weak areas and try again.';
+      document.getElementById('res-score').textContent = `${correct}/${total}`;
+      document.getElementById('res-pct').textContent   = `${pct}%`;
+      document.getElementById('res-time').textContent  = `${mins}:${secs.toString().padStart(2,'0')}`;
+
+      // Topic breakdown
+      const topics = {};
+      questions.forEach((q, i) => {
+        if (!topics[q.topic]) topics[q.topic] = { correct:0, total:0 };
+        topics[q.topic].total++;
+        if (answers[i] === q.correct) topics[q.topic].correct++;
+      });
+
+      const breakdownEl = document.getElementById('topic-breakdown');
+      breakdownEl.innerHTML = Object.entries(topics).map(([t, v]) => {
+        const p = Math.round((v.correct / v.total)*100);
+        const color = p >= 70 ? 'var(--success)' : p >= 50 ? 'var(--warning)' : 'var(--danger)';
+        return `
+          <div class="rb-item">
+            <div class="rb-label">${t}</div>
+            <div class="rb-bar">
+              <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" style="width:${p}%;background:${color};"></div>
+              </div>
+            </div>
+            <div class="rb-score" style="color:${color}">${p}%</div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('result-overlay').style.display = 'flex';
+    }
+
+    function reviewAnswers() {
+      isReviewMode = true;
+      document.getElementById('result-overlay').style.display = 'none';
+      currentQ = 0;
+      renderQuestion();
+      renderGrid();
+      // Hide submit/nav in review mode
+      document.querySelector('.question-nav-btns').style.display = 'none';
+      document.querySelector('.submit-card').style.display = 'none';
+
+      // Add "Back to Results" button
+      const panel = document.querySelector('.question-panel');
+      const backBtn = document.createElement('div');
+      backBtn.innerHTML = `<button class="btn btn-primary btn-lg" onclick="document.getElementById('result-overlay').style.display='flex'" style="margin-top:8px;"><i class="fas fa-chart-bar"></i> Back to Results</button>`;
+      panel.appendChild(backBtn);
+      showToast('Review mode — answers highlighted in green/red', 'info');
+    }
+
+    // ========== TOAST ==========
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      const icons = { success:'fa-check-circle', error:'fa-times-circle', info:'fa-info-circle' };
+      const colors = { success:'var(--success)', error:'var(--danger)', info:'var(--info)' };
+      const t = document.createElement('div');
+      t.className = `toast toast-${type}`;
+      t.innerHTML = `<i class="fas ${icons[type]}" style="color:${colors[type]}"></i> ${msg}`;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity='0'; t.style.transform='translateX(30px)'; t.style.transition='0.3s ease';
+        setTimeout(()=>t.remove(), 350);
+      }, 2500);
+    }
+
+    // ========== START ==========
+    init();
+  </script>
+</body>
+</html>
